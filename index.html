@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>EPI | Classical Focus</title>
+<style>
+
+  /* ============================================================
+     SELF-HOSTED FONTS — fully offline, no network required
+     ============================================================ */
+  @font-face {
+    font-family: 'Cinzel'; font-style: normal; font-weight: 400;
+    src: url('fonts/cinzel-latin-400-normal.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Cinzel'; font-style: normal; font-weight: 600;
+    src: url('fonts/cinzel-latin-600-normal.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Playfair Display'; font-style: normal; font-weight: 400;
+    src: url('fonts/playfair-display-latin-400-normal.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Playfair Display'; font-style: normal; font-weight: 500;
+    src: url('fonts/playfair-display-latin-500-normal.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'EB Garamond'; font-style: normal; font-weight: 400;
+    src: url('fonts/eb-garamond-latin-400-normal.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'EB Garamond'; font-style: italic; font-weight: 400;
+    src: url('fonts/eb-garamond-latin-400-italic.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'EB Garamond'; font-style: normal; font-weight: 500;
+    src: url('fonts/eb-garamond-latin-500-normal.woff2') format('woff2');
+  }
+
+  /* ============================================================
+     TOKENS — three classical palettes: Marble / Obsidian / Parchment
+     ============================================================ */
+  :root {
+    --bg: #ece7d9; --surface: #f8f4e7; --text: #2a2218; --text-muted: #8d8270;
+    --accent: #b6883c; --accent-soft: #e4ca8a; --oxide: #9b3f2d;
+    --border: rgba(120,95,42,0.18); --shadow: rgba(58,44,20,0.18);
+    --bevel-hi: rgba(255,255,255,0.6); --bevel-lo: rgba(40,30,10,0.06);
+    --vein: rgba(120,95,42,0.06);
+  }
+
+  .theme-dark {
+    --bg: #0d0c0a; --surface: #1a1714; --text: #f1e8d6; --text-muted: #7a7060;
+    --accent: #daa94e; --accent-soft: #f0cd86; --oxide: #c2614a;
+    --border: rgba(218,170,78,0.16); --shadow: rgba(0,0,0,0.6);
+    --bevel-hi: rgba(255,235,190,0.07); --bevel-lo: rgba(0,0,0,0.55);
+    --vein: rgba(218,170,78,0.05);
+  }
+
+  .theme-greige {
+    --bg: #d7c9a3; --surface: #eae0bd; --text: #473822; --text-muted: #8b7a54;
+    --accent: #9b4a33; --accent-soft: #c77f5e; --oxide: #5f2a1f;
+    --border: rgba(71,56,34,0.2); --shadow: rgba(58,40,16,0.16);
+    --bevel-hi: rgba(255,250,225,0.45); --bevel-lo: rgba(40,25,10,0.09);
+    --vein: rgba(71,56,34,0.06);
+  }
+
+  /* ============================================================
+     BASE
+     ============================================================ */
+  * { box-sizing: border-box; }
+
+  html { height: 100%; }
+  body {
+    min-height: 100vh;
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(ellipse 600px 300px at 12% -8%, rgba(255,255,255,0.35), transparent 60%),
+      linear-gradient(128deg, transparent 38%, var(--vein) 41%, transparent 44%),
+      linear-gradient(96deg, transparent 58%, var(--vein) 60%, transparent 63%),
+      linear-gradient(152deg, transparent 73%, var(--vein) 75%, transparent 78%);
+    color: var(--text);
+    font-family: 'EB Garamond', Garamond, Georgia, serif;
+    margin: 0; padding: 0; text-align: center;
+    transition: background-color 0.5s ease, color 0.5s ease;
+    user-select: none; overflow-x: hidden; overflow-y: auto;
+  }
+
+  /* themed fallback scrollbar — only shows if content ever slightly overflows */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--accent); opacity: 0.5; border-radius: 3px; }
+  ::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
+
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  /* ============================================================
+     CUSTOM TITLE BAR (frameless window)
+     ============================================================ */
+  .title-bar { height: 26px; width: 100%; -webkit-app-region: drag; }
+  .title-bar-controls {
+    -webkit-app-region: no-drag; display: flex; justify-content: flex-end;
+    gap: 2px; padding: 6px 8px 0;
+  }
+  .win-btn {
+    background: transparent; border: none; color: var(--text-muted);
+    width: 26px; height: 18px; border-radius: 2px; cursor: pointer;
+    font-size: 13px; line-height: 1; transition: all 0.2s; font-family: Georgia, serif;
+  }
+  .win-btn:hover { color: var(--text); background: var(--border); }
+  .win-close:hover { color: var(--oxide); }
+
+
+  .noise {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none; z-index: 9999; opacity: 0.035;
+    background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+  }
+
+  .defs-host { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+  /* ============================================================
+     CREST HEADER
+     ============================================================ */
+  .crest { padding: 8px 30px 0; position: relative; z-index: 10; -webkit-app-region: drag; }
+  .crest-row { display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .crest-mark {
+    margin: 0; font-family: 'Cinzel', 'Trajan Pro', Georgia, serif; font-weight: 600;
+    font-size: 25px; letter-spacing: 7px; color: var(--text);
+    text-shadow: 0 1px 0 var(--bevel-hi);
+  }
+  .sprig { width: 46px; height: 20px; color: var(--accent); opacity: 0.85; flex-shrink: 0; }
+  .sprig-left { transform: scaleX(-1); }
+  .crest-motto {
+    margin: 4px 0 10px; font-family: 'EB Garamond', Georgia, serif; font-style: italic;
+    font-size: 11px; letter-spacing: 1.5px; color: var(--text-muted);
+  }
+
+  .meander { width: 100%; height: 11px; color: var(--accent); opacity: 0.45; line-height: 0; }
+  .meander svg { width: 100%; height: 100%; display: block; }
+
+  .crest-rule {
+    position: relative; height: 1px; margin: 0 auto 0; width: 70%;
+    background: linear-gradient(90deg, transparent, var(--accent) 18%, var(--accent) 82%, transparent);
+    opacity: 0.6; overflow: visible;
+  }
+  .crest-rule::after {
+    content: ''; position: absolute; top: 0; left: -40%; width: 30%; height: 100%;
+    background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
+    animation: gleam 2.2s ease-out 0.3s 1;
+  }
+  @keyframes gleam { from { left: -40%; opacity: 0.9; } to { left: 110%; opacity: 0; } }
+
+  /* ============================================================
+     NAV
+     ============================================================ */
+  nav {
+    display: flex; justify-content: center; gap: 34px; padding: 10px 0 10px;
+    margin-bottom: 8px; position: relative; z-index: 10;
+  }
+  nav button {
+    background: transparent; color: var(--text-muted); border: none;
+    font-family: 'Cinzel', Georgia, serif; font-size: 10.5px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 2.5px;
+    cursor: pointer; padding-bottom: 7px; border-bottom: 1px solid transparent;
+    transition: all 0.3s;
+  }
+  nav button:hover { color: var(--text); }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .theme-picker { position: absolute; right: 22px; top: 6px; display: flex; gap: 9px; z-index: 20; -webkit-app-region: no-drag; }
+  .theme-btn {
+    width: 13px; height: 13px; border-radius: 50%; cursor: pointer;
+    border: 1px solid var(--border); box-shadow: 0 0 0 2px transparent, inset 0 0 0 1px rgba(0,0,0,0.15);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .theme-btn:hover { transform: scale(1.25); box-shadow: 0 0 0 2px var(--accent-soft); }
+
+  .page { display: none; padding: 0 32px 32px; animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+  .page.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ============================================================
+     INPUTS
+     ============================================================ */
+  .premium-input {
+    width: 100%; padding: 13px 18px; font-family: 'EB Garamond', Georgia, serif; font-size: 15px;
+    background-color: var(--surface); color: var(--text);
+    border: 1px solid var(--border); border-radius: 3px;
+    box-sizing: border-box; outline: none; transition: all 0.3s ease;
+    box-shadow: inset 0 1px 0 var(--bevel-hi), inset 0 -1px 0 var(--bevel-lo), 0 3px 8px var(--shadow);
+    margin-bottom: 10px;
+  }
+  .premium-input:focus { border-color: var(--accent); box-shadow: inset 0 1px 0 var(--bevel-hi), 0 0 0 2px var(--accent-soft); }
+
+  /* ============================================================
+     CUSTOM SELECT & DATE PICKER — native popups can't be themed,
+     so these fully replace them with styleable equivalents.
+     ============================================================ */
+  .custom-select, .custom-date { position: relative; }
+  .hidden-select { display: none; }
+
+  .select-trigger {
+    width: 100%; text-align: left; background-color: var(--surface); color: var(--text);
+    border: 1px solid var(--border); border-radius: 3px; box-sizing: border-box;
+    font-family: 'EB Garamond', Georgia, serif; font-size: 15px; padding: 13px 38px 13px 18px;
+    cursor: pointer; outline: none; position: relative;
+    box-shadow: inset 0 1px 0 var(--bevel-hi), inset 0 -1px 0 var(--bevel-lo), 0 3px 8px var(--shadow);
+    transition: all 0.2s ease; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .select-trigger::after {
+    content: ''; position: absolute; right: 16px; top: 50%; margin-top: -2px;
+    border: 5px solid transparent; border-top-color: var(--accent);
+  }
+  .custom-select.open .select-trigger, .custom-date.open .select-trigger {
+    border-color: var(--accent); box-shadow: inset 0 1px 0 var(--bevel-hi), 0 0 0 2px var(--accent-soft);
+  }
+
+  .select-menu {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 50;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 3px;
+    list-style: none; margin: 0; padding: 4px; max-height: 230px; overflow-y: auto;
+    box-shadow: 0 14px 28px var(--shadow), inset 0 1px 0 var(--bevel-hi);
+    display: none; text-align: left;
+  }
+  .custom-select.open .select-menu { display: block; }
+  .select-menu li {
+    padding: 10px 14px; font-family: 'EB Garamond', Georgia, serif; font-size: 14.5px;
+    color: var(--text); border-radius: 2px; cursor: pointer;
+  }
+  .select-menu li:hover { background: var(--accent); color: var(--bg); }
+  .select-menu li.selected { color: var(--accent); font-weight: 600; }
+  .select-menu li.selected:hover { color: var(--bg); }
+
+  .select-trigger-sm { width: auto; padding: 6px 28px 6px 14px; font-size: 12px; }
+  .select-trigger-sm::after { right: 10px; }
+  .select-menu-sm { min-width: 160px; left: auto; }
+  .select-menu-sm li { font-size: 12.5px; padding: 8px 12px; }
+
+  .date-panel {
+    position: absolute; top: calc(100% + 4px); right: 0; z-index: 50; width: 264px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 3px;
+    box-shadow: 0 14px 28px var(--shadow), inset 0 1px 0 var(--bevel-hi);
+    padding: 14px; display: none; text-align: left;
+  }
+  .custom-date.open .date-panel { display: block; }
+  .date-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .date-panel-month {
+    font-family: 'Cinzel', Georgia, serif; font-size: 11.5px; letter-spacing: 1.5px;
+    color: var(--text); text-transform: uppercase;
+  }
+  .date-nav {
+    background: transparent; border: 1px solid var(--border); color: var(--accent);
+    width: 22px; height: 22px; border-radius: 3px; cursor: pointer; font-size: 11px; line-height: 1;
+    transition: all 0.2s;
+  }
+  .date-nav:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .date-weekdays {
+    display: flex; text-align: center;
+    font-family: 'Cinzel', Georgia, serif; font-size: 8px; color: var(--text-muted);
+    letter-spacing: 0.5px; margin-bottom: 6px;
+  }
+  .date-weekdays span { flex: 1; }
+  .date-grid { display: flex; flex-wrap: wrap; }
+  .date-cell {
+    width: 14.28%; height: 30px; box-sizing: border-box;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'EB Garamond', Georgia, serif; font-size: 13px; color: var(--text);
+    border-radius: 50%; cursor: pointer; transition: all 0.15s;
+  }
+  .date-cell:hover { background: var(--border); }
+  .date-cell.muted { color: var(--text-muted); opacity: 0.4; cursor: default; }
+  .date-cell.muted:hover { background: transparent; }
+  .date-cell.today { box-shadow: inset 0 0 0 1px var(--accent); }
+  .date-cell.selected { background: var(--accent); color: var(--bg); font-weight: 600; }
+  .date-cell.selected:hover { background: var(--accent); }
+  .date-panel-footer {
+    display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .date-link {
+    background: transparent; border: none; color: var(--accent); cursor: pointer;
+    font-family: 'Cinzel', Georgia, serif; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .date-link:hover { color: var(--text); }
+
+  /* ============================================================
+     TIMER + WREATH
+     ============================================================ */
+  .timer-container { margin: 10px 0 0; }
+  .timer-face {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .timer {
+    font-family: 'Playfair Display', 'Didot', Georgia, serif; font-size: 96px; font-weight: 500;
+    color: var(--text); line-height: 1; letter-spacing: -3px; text-shadow: 0 12px 26px var(--shadow);
+  }
+  #mode-display {
+    margin-top: 10px; font-family: 'Cinzel', Georgia, serif; font-size: 9.5px; font-weight: 600;
+    letter-spacing: 3.5px; text-transform: uppercase; color: var(--accent);
+    display: flex; align-items: center; gap: 9px;
+  }
+  #mode-display::before, #mode-display::after { content: ''; width: 16px; height: 1px; background: var(--accent); opacity: 0.7; }
+
+  .wreath-base { display: block; width: 84%; max-width: 320px; height: auto; margin: 8px auto 0; overflow: visible; pointer-events: none; }
+  .wreath-stem { stroke: var(--text-muted); stroke-width: 1.4; opacity: 0.4; fill: none; }
+  .wreath-leaf { fill: var(--text-muted); stroke: var(--text-muted); stroke-width: 0.5; opacity: 0.32; transition: fill 0.6s, opacity 0.6s, stroke 0.6s; }
+  .wreath-leaf-slot.filled .wreath-leaf {
+    fill: var(--accent); stroke: var(--accent-soft); opacity: 1; filter: url(#leafGlow);
+  }
+  .knot-wing { fill: var(--accent); opacity: 0.7; }
+  .knot-center { fill: var(--accent); opacity: 0.9; }
+
+  .controls { display: flex; justify-content: center; gap: 13px; margin-top: 18px; }
+  .btn {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    font-family: 'Cinzel', Georgia, serif; padding: 13px 26px; border-radius: 3px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; cursor: pointer;
+    box-shadow: inset 0 1px 0 var(--bevel-hi), inset 0 -1px 0 var(--bevel-lo), 0 6px 14px var(--shadow);
+    transition: all 0.2s ease;
+  }
+  .btn.primary {
+    background: linear-gradient(160deg, var(--accent-soft), var(--accent));
+    color: var(--bg); border: 1px solid transparent;
+    box-shadow: 0 6px 16px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px var(--shadow), inset 0 1px 0 var(--bevel-hi); }
+  .btn.primary:hover { box-shadow: 0 10px 22px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.45); }
+
+  .settings-toggle {
+    margin-top: 16px; font-family: 'Cinzel', Georgia, serif; font-size: 9.5px; color: var(--text-muted);
+    cursor: pointer; text-transform: uppercase; letter-spacing: 2.5px; transition: color 0.2s;
+  }
+  .settings-toggle:hover { color: var(--accent); }
+
+  #settings-panel {
+    display: none; margin-top: 10px; background: var(--surface); padding: 14px;
+    border-radius: 3px; border: 1px solid var(--border); text-align: left;
+    box-shadow: inset 0 1px 0 var(--bevel-hi), 0 8px 18px var(--shadow);
+  }
+
+  .input-group { display: flex; gap: 10px; margin-bottom: 4px; }
+  .input-group label {
+    font-family: 'Cinzel', Georgia, serif; font-size: 9px; letter-spacing: 1.5px;
+    color: var(--text-muted); margin-bottom: 6px; display: block;
+  }
+  .input-group input {
+    flex: 1; width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 3px; color: var(--text); outline: none; font-family: 'EB Garamond', Georgia, serif; font-size: 14px;
+  }
+  #settings-panel label.auto-row {
+    font-family: 'EB Garamond', Georgia, serif; font-size: 12.5px; display: flex; align-items: center;
+    gap: 8px; margin-top: 14px; color: var(--text-muted);
+  }
+  #settings-panel input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; }
+
+  /* ============================================================
+     TASKS
+     ============================================================ */
+  .task-list { list-style: none; padding: 0; text-align: left; margin-top: 6px; max-height: 340px; overflow-y: auto; }
+  .task-list::-webkit-scrollbar { width: 5px; }
+  .task-list::-webkit-scrollbar-track { background: transparent; }
+  .task-list::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; opacity: 0.6; }
+
+  .task-item {
+    padding: 14px 2px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .task-title { font-size: 14.5px; font-weight: 500; font-family: 'EB Garamond', Georgia, serif; margin-bottom: 4px; }
+  .task-meta { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; }
+  .priority-dot {
+    display: inline-block; width: 7px; height: 7px; margin-right: 6px;
+    transform: rotate(45deg); border-radius: 1px;
+  }
+  .p-High { background: var(--oxide); } .p-Medium { background: var(--accent); } .p-Low { background: var(--text-muted); }
+  .overdue { color: var(--oxide); font-weight: bold; }
+  .done-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--accent);
+    width: 27px; height: 27px; border-radius: 50%; cursor: pointer; transition: all 0.2s;
+    font-family: 'EB Garamond', serif; box-shadow: inset 0 0 0 2px transparent;
+  }
+  .done-btn:hover { background: var(--accent); color: var(--bg); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+  /* ============================================================
+     STATS / LEGACY
+     ============================================================ */
+  .stat-card {
+    flex: 1; background: var(--surface); padding: 20px; border-radius: 3px;
+    border: 1px solid var(--border); position: relative; overflow: hidden;
+    box-shadow: inset 0 1px 0 var(--bevel-hi), inset 0 -1px 0 var(--bevel-lo), 0 8px 18px var(--shadow);
+  }
+  .stat-numeral {
+    position: absolute; right: 2px; bottom: -14px; font-family: 'Cinzel', serif; font-size: 64px;
+    color: var(--text); opacity: 0.06; line-height: 1; pointer-events: none;
+  }
+  .stat-value { font-family: 'Playfair Display', serif; font-size: 30px; position: relative; z-index: 1; }
+  .stat-label {
+    font-family: 'Cinzel', Georgia, serif; font-size: 9px; text-transform: uppercase;
+    color: var(--text-muted); letter-spacing: 2px; margin-top: 4px; position: relative; z-index: 1;
+  }
+
+  .chart-container {
+    background: var(--surface); padding: 18px; border-radius: 3px; border: 1px solid var(--border);
+    margin-top: 18px; box-shadow: inset 0 1px 0 var(--bevel-hi), 0 8px 18px var(--shadow);
+  }
+  .chart-filters { display: flex; gap: 5px; margin-bottom: 14px; }
+  .chart-filters button {
+    flex: 1; padding: 8px; border-radius: 3px; font-family: 'Cinzel', Georgia, serif;
+    font-size: 9.5px; letter-spacing: 1px; background: var(--bg); color: var(--text-muted);
+    border: 1px solid var(--border); cursor: pointer; transition: 0.25s;
+  }
+  .chart-filters button:hover { color: var(--text); border-color: var(--accent); }
+  .chart-filters button.active { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+
+</style>
+</head>
+<body>
+  <div class="noise"></div>
+
+  <div class="title-bar">
+    <div class="title-bar-controls">
+      <button class="win-btn win-min" onclick="minimizeWindow()" title="Minimize">&#8211;</button>
+      <button class="win-btn win-close" onclick="closeWindow()" title="Close">&#10005;</button>
+    </div>
+  </div>
+
+  <svg class="defs-host" aria-hidden="true">
+    <defs>
+      <filter id="leafGlow" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="2.6" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <pattern id="meanderKey" width="24" height="24" patternUnits="userSpaceOnUse">
+        <path d="M0,18 L0,6 L6,6 L6,12 L12,12 L12,0 L18,0 L18,18 L24,18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/>
+      </pattern>
+    </defs>
+  </svg>
+
+  <header class="crest">
+    <div class="theme-picker">
+      <div class="theme-btn" style="background: #ece7d9;" onclick="setTheme('default')" title="Marble"></div>
+      <div class="theme-btn" style="background: #0d0c0a;" onclick="setTheme('theme-dark')" title="Obsidian"></div>
+      <div class="theme-btn" style="background: #d7c9a3;" onclick="setTheme('theme-greige')" title="Parchment"></div>
+    </div>
+    <div class="crest-row">
+      <svg class="sprig sprig-left" viewBox="12 6 50 34" aria-hidden="true">
+        <path d="M22.0,37.0 L23.0,37.0 L24.0,36.9 L25.0,36.9 L26.0,36.7 L27.0,36.6 L27.9,36.4 L28.9,36.2 L29.9,36.0 L30.8,35.7 L31.8,35.4 L32.7,35.0 L33.6,34.7 L34.5,34.3 L35.4,33.8 L36.3,33.4 L37.2,32.9 L38.0,32.4 L38.9,31.8 L39.7,31.2 L40.5,30.6 L41.2,30.0 L42.0,29.4 L42.7,28.7 L43.4,28.0 L44.1,27.3 L44.8,26.5 L45.4,25.8 L46.0,25.0 L46.6,24.2 L47.2,23.3 L47.7,22.5 L48.2,21.6 L48.7,20.8 L49.1,19.9 L49.5,19.0 L49.9,18.0 L50.2,17.1 L50.6,16.2 L50.9,15.2 L51.1,14.3" class="wreath-stem"/>
+        <path d="M0,0 C1.12,-2.18 8.68,-2.30 14.00,0 C8.68,2.30 1.12,2.18 0,0 Z" class="wreath-leaf" transform="translate(26.2,36.7) rotate(76.0) scale(1,1)"/>
+        <path d="M0,0 C1.02,-1.99 7.90,-2.09 12.74,0 C7.90,2.09 1.02,1.99 0,0 Z" class="wreath-leaf" transform="translate(39.6,31.3) rotate(62.0) scale(1,1)"/>
+        <path d="M0,0 C0.92,-1.79 7.12,-1.89 11.48,0 C7.12,1.89 0.92,1.79 0,0 Z" class="wreath-leaf" transform="translate(48.5,21.1) rotate(24.0) scale(1,1)"/>
+      </svg>
+      <h1 class="crest-mark">EPI</h1>
+      <svg class="sprig sprig-right" viewBox="12 6 50 34" aria-hidden="true">
+        <path d="M22.0,37.0 L23.0,37.0 L24.0,36.9 L25.0,36.9 L26.0,36.7 L27.0,36.6 L27.9,36.4 L28.9,36.2 L29.9,36.0 L30.8,35.7 L31.8,35.4 L32.7,35.0 L33.6,34.7 L34.5,34.3 L35.4,33.8 L36.3,33.4 L37.2,32.9 L38.0,32.4 L38.9,31.8 L39.7,31.2 L40.5,30.6 L41.2,30.0 L42.0,29.4 L42.7,28.7 L43.4,28.0 L44.1,27.3 L44.8,26.5 L45.4,25.8 L46.0,25.0 L46.6,24.2 L47.2,23.3 L47.7,22.5 L48.2,21.6 L48.7,20.8 L49.1,19.9 L49.5,19.0 L49.9,18.0 L50.2,17.1 L50.6,16.2 L50.9,15.2 L51.1,14.3" class="wreath-stem"/>
+        <path d="M0,0 C1.12,-2.18 8.68,-2.30 14.00,0 C8.68,2.30 1.12,2.18 0,0 Z" class="wreath-leaf" transform="translate(26.2,36.7) rotate(76.0) scale(1,1)"/>
+        <path d="M0,0 C1.02,-1.99 7.90,-2.09 12.74,0 C7.90,2.09 1.02,1.99 0,0 Z" class="wreath-leaf" transform="translate(39.6,31.3) rotate(62.0) scale(1,1)"/>
+        <path d="M0,0 C0.92,-1.79 7.12,-1.89 11.48,0 C7.12,1.89 0.92,1.79 0,0 Z" class="wreath-leaf" transform="translate(48.5,21.1) rotate(24.0) scale(1,1)"/>
+      </svg>
+    </div>
+    <p class="crest-motto">tempus fugit &middot; carpe diem</p>
+    <div class="crest-rule"></div>
+  </header>
+
+  <nav>
+    <button onclick="switchTab('pomodoro')" id="tab-pomodoro" class="active">Focus</button>
+    <button onclick="switchTab('tasks')" id="tab-tasks">Decrees</button>
+    <button onclick="switchTab('stats')" id="tab-stats">Legacy</button>
+  </nav>
+
+  <div id="pomodoro" class="page active">
+
+    <div class="custom-select" id="active-task-select-widget" style="margin-bottom:10px;">
+      <select id="active-task-select" class="hidden-select">
+        <option value="">-- Select a Task --</option>
+      </select>
+      <button type="button" class="select-trigger">-- Select a Task --</button>
+      <ul class="select-menu"></ul>
+    </div>
+
+    <div class="timer-container">
+      <div class="timer-face">
+        <div class="timer" id="time-display">25:00</div>
+        <div id="mode-display">Work Session</div>
+      </div>
+
+      <svg class="wreath-base" viewBox="0 0 380 80" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <path d="M190.0,66.0 L186.0,66.0 L181.9,65.9 L177.9,65.7 L173.8,65.5 L169.8,65.3 L165.7,65.0 L161.7,64.6 L157.7,64.2 L153.7,63.7 L149.6,63.2 L145.6,62.6 L141.6,61.9 L137.6,61.2 L133.7,60.5 L129.7,59.7 L125.8,58.8 L121.8,57.9 L117.9,56.9 L114.0,55.9 L110.1,54.8 L106.2,53.6 L102.3,52.4 L98.5,51.2 L94.6,49.9 L90.8,48.5 L87.0,47.1 L83.2,45.6 L79.5,44.1 L75.8,42.5 L72.0,40.9 L68.4,39.3 L64.7,37.5 L61.1,35.8 L57.4,33.9 L53.9,32.1 L50.3,30.1 L46.8,28.2 L43.3,26.1 L39.8,24.1 L36.3,21.9" class="wreath-stem"/>
+        <g class="wreath-leaf-slot" id="leaf-l1"><path d="M0,0 C2.08,-3.80 16.12,-4.00 26.00,0 C16.12,4.00 2.08,3.80 0,0 Z" class="wreath-leaf" transform="translate(154.7,63.8) rotate(271.0) scale(-1,1)"/></g>
+        <g class="wreath-leaf-slot" id="leaf-l2"><path d="M0,0 C1.91,-3.50 14.83,-3.68 23.92,0 C14.83,3.68 1.91,3.50 0,0 Z" class="wreath-leaf" transform="translate(114.9,56.1) rotate(289.0) scale(-1,1)"/></g>
+        <g class="wreath-leaf-slot" id="leaf-l3"><path d="M0,0 C1.75,-3.19 13.54,-3.36 21.84,0 C13.54,3.36 1.75,3.19 0,0 Z" class="wreath-leaf" transform="translate(76.7,42.9) rotate(285.0) scale(-1,1)"/></g>
+        <g class="wreath-leaf-slot" id="leaf-l4"><path d="M0,0 C1.58,-2.89 12.25,-3.04 19.76,0 C12.25,3.04 1.58,2.89 0,0 Z" class="wreath-leaf" transform="translate(45.0,27.1) rotate(306.0) scale(-1,1)"/></g>
+
+        <path d="M190.0,66.0 L194.0,66.0 L198.1,65.9 L202.1,65.7 L206.2,65.5 L210.2,65.3 L214.3,65.0 L218.3,64.6 L222.3,64.2 L226.3,63.7 L230.4,63.2 L234.4,62.6 L238.4,61.9 L242.4,61.2 L246.3,60.5 L250.3,59.7 L254.2,58.8 L258.2,57.9 L262.1,56.9 L266.0,55.9 L269.9,54.8 L273.8,53.6 L277.7,52.4 L281.5,51.2 L285.4,49.9 L289.2,48.5 L293.0,47.1 L296.8,45.6 L300.5,44.1 L304.2,42.5 L308.0,40.9 L311.6,39.3 L315.3,37.5 L318.9,35.8 L322.6,33.9 L326.1,32.1 L329.7,30.1 L333.2,28.2 L336.7,26.1 L340.2,24.1 L343.7,21.9" class="wreath-stem"/>
+        <g class="wreath-leaf-slot" id="leaf-r1"><path d="M0,0 C2.08,-3.80 16.12,-4.00 26.00,0 C16.12,4.00 2.08,3.80 0,0 Z" class="wreath-leaf" transform="translate(225.3,63.8) rotate(269.0) scale(1,1)"/></g>
+        <g class="wreath-leaf-slot" id="leaf-r2"><path d="M0,0 C1.91,-3.50 14.83,-3.68 23.92,0 C14.83,3.68 1.91,3.50 0,0 Z" class="wreath-leaf" transform="translate(265.1,56.1) rotate(251.0) scale(1,1)"/></g>
+        <g class="wreath-leaf-slot" id="leaf-r3"><path d="M0,0 C1.75,-3.19 13.54,-3.36 21.84,0 C13.54,3.36 1.75,3.19 0,0 Z" class="wreath-leaf" transform="translate(303.3,42.9) rotate(255.0) scale(1,1)"/></g>
+        <g class="wreath-leaf-slot" id="leaf-r4"><path d="M0,0 C1.58,-2.89 12.25,-3.04 19.76,0 C12.25,3.04 1.58,2.89 0,0 Z" class="wreath-leaf" transform="translate(335.0,27.1) rotate(234.0) scale(1,1)"/></g>
+
+        <g class="wreath-knot" transform="translate(190,66.0)">
+          <path d="M0,0 L-11,-7.5 L-3.3,0 L-11,7.5 Z" class="knot-wing"/>
+          <path d="M0,0 L11,-7.5 L3.3,0 L11,7.5 Z" class="knot-wing"/>
+          <circle r="2.8" class="knot-center"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="controls">
+      <button class="btn primary" id="start-btn">Start</button>
+      <button class="btn" id="pause-btn">Pause</button>
+      <button class="btn" id="reset-btn">Reset</button>
+    </div>
+
+    <div class="settings-toggle" onclick="toggleSettings()" id="toggle-btn">Configure &#9662;</div>
+
+    <div id="settings-panel">
+      <div class="input-group">
+        <div style="flex:1"><label>Work</label><input type="number" id="work-duration" value="25"></div>
+        <div style="flex:1"><label>Short</label><input type="number" id="short-duration" value="5"></div>
+        <div style="flex:1"><label>Long</label><input type="number" id="long-duration" value="15"></div>
+      </div>
+      <label class="auto-row">
+        <input type="checkbox" id="auto-transition" checked> Auto-transition breaks
+      </label>
+    </div>
+  </div>
+
+  <div id="tasks" class="page">
+    <input type="text" id="task-input" class="premium-input" placeholder="What requires your attention?">
+
+    <div style="display: flex; gap: 10px; margin-bottom: 13px;">
+      <div class="custom-select" id="task-priority-widget" style="flex: 1;">
+        <select id="task-priority" class="hidden-select">
+          <option value="High">High Priority</option>
+          <option value="Medium" selected>Medium Priority</option>
+          <option value="Low">Low Priority</option>
+        </select>
+        <button type="button" class="select-trigger">Medium Priority</button>
+        <ul class="select-menu"></ul>
+      </div>
+      <div class="custom-date" id="task-date-widget" style="flex: 1;">
+        <input type="hidden" id="task-date" value="">
+        <button type="button" class="select-trigger date-trigger">Due Date</button>
+        <div class="date-panel">
+          <div class="date-panel-header">
+            <button type="button" class="date-nav" id="date-prev">&#10094;</button>
+            <span class="date-panel-month" id="date-panel-month"></span>
+            <button type="button" class="date-nav" id="date-next">&#10095;</button>
+          </div>
+          <div class="date-weekdays"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+          <div class="date-grid" id="date-grid"></div>
+          <div class="date-panel-footer">
+            <button type="button" class="date-link" id="date-clear">Clear</button>
+            <button type="button" class="date-link" id="date-today">Today</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn primary" id="add-task-btn" style="width: 100%;">Add Decree</button>
+
+    <div style="margin-top: 22px; display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-family:'Cinzel',Georgia,serif; font-size: 9.5px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 2px;">Directives</span>
+      <div class="custom-select" id="sort-select-widget">
+        <select id="sort-select" class="hidden-select" onchange="renderTasks()">
+          <option value="date">Sort by Date</option>
+          <option value="priority">Sort by Priority</option>
+        </select>
+        <button type="button" class="select-trigger select-trigger-sm">Sort by Date</button>
+        <ul class="select-menu select-menu-sm"></ul>
+      </div>
+    </div>
+
+    <ul class="task-list" id="task-list"></ul>
+  </div>
+
+  <div id="stats" class="page">
+    <div style="display: flex; gap: 14px; margin-bottom: 8px;">
+      <div class="stat-card">
+        <div class="stat-numeral">I</div>
+        <div class="stat-value" id="total-focus-h">0h</div>
+        <div class="stat-label">Focus</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-numeral">II</div>
+        <div class="stat-value" id="total-tasks">0</div>
+        <div class="stat-label">Tasks</div>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <div class="meander" aria-hidden="true" style="margin-bottom:14px;">
+        <svg viewBox="0 0 240 24" preserveAspectRatio="none"><rect width="240" height="24" fill="url(#meanderKey)"/></svg>
+      </div>
+      <div class="chart-filters">
+        <button onclick="updateChart('week')" class="active" data-view="week">7D</button>
+        <button onclick="updateChart('month')" data-view="month">30D</button>
+        <button onclick="updateChart('year')" data-view="year">1Y</button>
+        <button onclick="updateChart('all')" data-view="all">ALL</button>
+      </div>
+      <canvas id="focusChart"></canvas>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

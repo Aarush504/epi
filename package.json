@@ -1,0 +1,33 @@
+{
+  "name": "epi",
+  "version": "1.0.0",
+  "description": "EPI - A clean, local Pomodoro and task tracker.",
+  "main": "main.js",
+  "author": "Aarush Padki (Aarush504)",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --mac --linux"
+  },
+  "build": {
+    "appId": "com.yourname.epi",
+    "productName": "EPI",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "icon": "icon.ico"
+    },
+    "mac": {
+      "icon": "icon.icns"
+    }
+  },
+  "dependencies": {
+    "chart.js": "^4.5.1",
+    "electron-store": "^8.1.0"
+  },
+  "devDependencies": {
+    "electron": "^24.0.0",
+    "electron-builder": "^23.6.0"
+  }
+}
