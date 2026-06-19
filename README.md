@@ -1,10 +1,18 @@
-# EPI · Classical Focus
+<div align="center">
+  <img src="docs/logo.png" width="100" alt="EPI logo"/>
+  <h1>EPI · Classical Focus</h1>
+  <p>A Pomodoro timer and task tracker with a Roman/Platonic aesthetic.<br>Built with Electron. Fully offline.</p>
+</div>
 
-A Pomodoro timer and task tracker with a Roman/Platonic aesthetic. Built with Electron. Fully offline.
+---
 
-[Features](#features) · [Install](#install) · [Run](#run) · [Structure](#structure) · [License](#license)
-
-![EPI — Obsidian theme](docs/screenshot-dark.png)
+<div align="center">
+  <img src="docs/screenshot-dark.png" width="260" alt="Focus tab"/>
+  &nbsp;&nbsp;
+  <img src="docs/screenshot-decrees.png" width="260" alt="Decrees tab"/>
+  &nbsp;&nbsp;
+  <img src="docs/screenshot-legacy.png" width="260" alt="Legacy tab"/>
+</div>
 
 ---
 
@@ -23,12 +31,10 @@ A Pomodoro timer and task tracker with a Roman/Platonic aesthetic. Built with El
 **Prerequisites:** [Node.js](https://nodejs.org) (v18+) and npm.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/epi.git
+git clone 'repository link'
 cd epi
 npm install
 ```
-
-That's it. No backend, no database, no config file.
 
 ## Run
 
@@ -42,7 +48,7 @@ npm start
 npm run build
 ```
 
-Output goes to `dist/`. Targets Windows, macOS, and Linux via `electron-builder`. You'll need an `icon.ico` / `icon.icns` for the respective platforms — placeholder names are already set in `package.json`.
+Output goes to `dist/`. Targets Windows, macOS, and Linux via `electron-builder`.
 
 ## Structure
 
@@ -61,7 +67,7 @@ The entire app is three files and a fonts folder. No framework, no bundler, no b
 
 Typography: **Cinzel** for inscriptional labels, **Playfair Display** for the timer and stat numerals, **EB Garamond** for body text. Palette tokens are scoped per theme using CSS custom properties — swap a body class and every color updates at once.
 
-The custom dropdowns and date picker replace native OS popups (which can't be themed) with fully styled equivalents that write back to hidden `<select>` and `<input>` elements, so all existing JS logic reads them normally.
+The custom dropdowns and date picker replace native OS popups (which can't be themed) with fully styled equivalents that proxy hidden `<select>` and `<input>` elements, so all existing JS logic reads them normally.
 
 ## License
 
